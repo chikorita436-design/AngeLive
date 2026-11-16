@@ -109,7 +109,17 @@ h1 em{font-style:italic;font-weight:400;background:linear-gradient(120deg,#fff 1
 .slides{display:flex;height:100%;transition:transform .9s cubic-bezier(.65,0,.25,1)}
 .slides.nt{transition:none}
 .slide{flex:0 0 100%;height:100%}
-.slide img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.slide img,.slide video{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+.screen img.portada{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+.gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:rgba(14,6,18,.94);backdrop-filter:blur(30px) saturate(120%);-webkit-backdrop-filter:blur(30px)}
+.gate.off{display:none}
+.gate .gbox{width:min(440px,100%);text-align:center;background:linear-gradient(160deg,#2A0E33,#140719);border:1px solid rgba(255,61,154,.3);border-radius:30px;padding:42px 30px;box-shadow:0 40px 100px -30px rgba(255,61,154,.45)}
+.gate .glogo{font-family:var(--serif);font-style:italic;font-size:64px;line-height:1;background:linear-gradient(120deg,#fff 10%,var(--pink2) 50%,var(--violet) 95%);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 .08em .18em}
+.gate .g18{display:inline-grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2px solid var(--pink);color:var(--pink2);font-weight:800;font-size:18px;margin:18px 0 6px}
+.gate h2{font-size:26px;margin:10px 0 0}
+.gate p{color:var(--mute);line-height:1.6;margin:12px 0 26px}
+.gate .gb{display:flex;flex-direction:column;gap:12px}
+body.gated{overflow:hidden}
 .frame .slide img{aspect-ratio:auto;border-radius:0}
 .slider::after{content:"";position:absolute;inset:auto 0 0 0;height:90px;background:linear-gradient(transparent,rgba(10,3,14,.55));pointer-events:none}
 .sdots{position:absolute;left:0;right:0;bottom:18px;z-index:2;display:flex;justify-content:center;gap:7px}
@@ -232,7 +242,29 @@ footer{border-top:1px solid var(--line);margin-top:120px}
 }
 </style>
 </head>
-<body>
+<body class="gated">
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gt">
+  <div class="gbox">
+    <div class="glogo">Ange</div>
+    <div class="g18">+18</div>
+    <h2 id="gt">Contenido para adultos</h2>
+    <p>Esta página es solo para mayores de 18 años. Al entrar confirmas que tienes la edad legal en tu país.</p>
+    <div class="gb">
+      <button class="btn btn-main" id="gYes" type="button">Soy mayor de 18 · Entrar</button>
+      <a class="btn btn-ghost" href="https://www.google.com" rel="noopener">Salir</a>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var g=document.getElementById('gate'),ok=false;
+  try{ok=localStorage.getItem('edad18')==='1';}catch(e){}
+  function abrir(){g.classList.add('off');document.body.classList.remove('gated');}
+  window.__abrirGate=abrir;
+  if(ok) abrir();
+  document.getElementById('gYes').addEventListener('click',function(){try{localStorage.setItem('edad18','1');}catch(e){} abrir();});
+})();
+</script>
 <div class="glow"></div><div class="grain"></div>
 
 <header id="top">
@@ -429,7 +461,7 @@ footer{border-top:1px solid var(--line);margin-top:120px}
   var v=document.getElementById('livevid'), tap=document.getElementById('tapplay');
   if(!v) return;
   v.muted=true; v.defaultMuted=true; v.setAttribute('muted','');
-  function go(){ var p=v.play(); if(p&&p.catch) p.then(function(){tap.classList.remove('show')}).catch(function(){tap.classList.add('show')}); }
+  function go(){ if(!v.isConnected) return; var p=v.play(); if(p&&p.catch) p.then(function(){tap.classList.remove('show')}).catch(function(){tap.classList.add('show')}); }
   v.addEventListener('playing',function(){tap.classList.remove('show')});
   v.addEventListener('loadeddata',go);
   tap.addEventListener('click',function(){ v.muted=true; go(); });
@@ -438,7 +470,7 @@ footer{border-top:1px solid var(--line);margin-top:120px}
   });
   document.addEventListener('visibilitychange',function(){ if(!document.hidden&&v.paused) go(); });
   go();
-  setTimeout(function(){ if(v.paused) tap.classList.add('show'); },2500);
+  setTimeout(function(){ if(v.isConnected&&v.paused) tap.classList.add('show'); },2500);
 })();
 </script>
 <script>
@@ -489,6 +521,7 @@ window.startSlider=function(){
     document.title=document.title.replace(re,nuevo);
   }
   function aplicar(d){
+    if(d.aviso18===false&&window.__abrirGate) window.__abrirGate();
     if(d.usuario) reemplazarTexto('ange594',d.usuario.replace(/^@/,''));
     if(d.nombre){ reemplazarTexto('Ange',d.nombre); var w=document.querySelector('.who span'); if(w) w.textContent=d.nombre.charAt(0).toUpperCase(); }
     document.querySelectorAll('[data-k]').forEach(function(el){ var v=d[el.getAttribute('data-k')]; if(v) el.textContent=v; });
@@ -496,9 +529,17 @@ window.startSlider=function(){
     document.querySelectorAll('a[href*="t.me/"]').forEach(function(a){ if(d.link_telegram) a.href=d.link_telegram; else if(d.link_telegram==='') a.style.display='none'; });
     if(d.fotos&&d.fotos.length){
       var tr=document.getElementById('slides'), nom=d.nombre||'Ange';
-      tr.innerHTML=d.fotos.map(function(f,i){ var u=typeof f==='string'?f:f.url; return '<div class="slide"><img src="'+String(u).replace(/"/g,'&quot;')+'" alt="Foto de '+nom.replace(/</g,'')+' '+(i+1)+'" decoding="async"></div>'; }).join('');
+      var q=function(s){return String(s||'').replace(/"/g,'&quot;');};
+      tr.innerHTML=d.fotos.map(function(f,i){ var u=typeof f==='string'?f:f.url;
+        if(f&&f.type==='video') return '<div class="slide"><video src="'+q(u)+'"'+(f.poster?' poster="'+q(f.poster)+'"':'')+' muted loop playsinline autoplay preload="metadata" aria-label="Video de '+q(nom)+'"></video></div>';
+        return '<div class="slide"><img src="'+q(u)+'" alt="Foto de '+q(nom)+' '+(i+1)+'" decoding="async"></div>'; }).join('');
+      tr.querySelectorAll('video').forEach(function(v){ v.muted=true; var p=v.play(); if(p&&p.catch) p.catch(function(){}); });
     }
-    if(d.video){
+    if(d.portada_tipo==='foto'&&d.video_portada){
+      var lv=document.getElementById('livevid'), tb=document.getElementById('tapplay');
+      if(lv){ var im=document.createElement('img'); im.className='portada'; im.src=d.video_portada; im.alt='Foto de '+(d.nombre||'Ange'); lv.pause(); lv.replaceWith(im); }
+      if(tb) tb.remove();
+    } else if(d.video){
       var v=document.getElementById('livevid');
       if(v){ if(d.video_portada) v.poster=d.video_portada; v.src=d.video; v.muted=true; v.load(); var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
     }

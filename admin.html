@@ -63,11 +63,21 @@ main{max-width:1040px;margin:0 auto;padding:30px 22px 120px}
 .ph .tools button:hover{background:rgba(255,255,255,.3)}
 .ph .tools button.del{background:rgba(255,107,107,.85)}
 .ph .tools button:disabled{opacity:.3;cursor:default}
+.ph video{width:100%;height:100%;object-fit:cover;display:block}
+.ph .vt{position:absolute;top:8px;right:8px;background:rgba(255,61,154,.9);font-size:11px;font-weight:800;letter-spacing:.06em;padding:4px 8px;border-radius:99px}
+.pvbox{width:200px;flex:none}
+.pvbox video,.pvbox img{width:200px;aspect-ratio:9/15;object-fit:cover;border-radius:18px;background:#1d0e24;border:1px solid var(--line);display:block}
+.sw{display:flex;align-items:center;gap:14px;cursor:pointer;font-size:15.5px;font-weight:600;color:var(--ink);margin:0}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw span{flex:none;width:50px;height:28px;border-radius:99px;background:rgba(255,255,255,.15);position:relative;transition:background .2s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw input:checked + span{background:linear-gradient(135deg,var(--pink),var(--violet))}
+.sw input:checked + span::after{transform:translateX(22px)}
+.sw input:focus-visible + span{outline:2px solid var(--pink2);outline-offset:3px}
 .add{background:transparent;border:2px dashed rgba(255,61,154,.45);border-radius:16px;aspect-ratio:4/5;display:grid;place-items:center;text-align:center;cursor:pointer;color:var(--pink2);font-weight:700;padding:12px;transition:background .2s}
 .add:hover{background:rgba(255,61,154,.08)}
 .add b{display:block;font-size:34px;line-height:1;margin-bottom:6px}
 .vid{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
-.vid video{width:200px;aspect-ratio:9/15;object-fit:cover;border-radius:18px;background:#1d0e24;border:1px solid var(--line)}
 .vid .side{flex:1;min-width:220px}
 .vid .side p{color:var(--mute);font-size:14px;line-height:1.55;margin:0 0 16px}
 .prog{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:12px}
@@ -118,25 +128,31 @@ main{max-width:1040px;margin:0 auto;padding:30px 22px 120px}
     <p>Cambia lo que quieras y toca <b>Guardar cambios</b>. Tu página se actualiza al instante.</p>
 
     <section class="sec">
-      <h2>Fotos del carrusel</h2>
-      <p class="h">Se muestran en este orden y pasan solas. Usa las flechas para moverlas. Las fotos se achican solas para que la página cargue rápido.</p>
+      <h2>Fotos y videos del carrusel</h2>
+      <p class="h">Se muestran en este orden y pasan solas. Usa las flechas para moverlas. Puedes mezclar fotos y videos (MP4, máximo 45 MB cada uno; se ven sin sonido y en bucle). Las fotos se achican solas para que la página cargue rápido.</p>
       <div class="photos" id="photos"></div>
-      <input type="file" id="inFotos" accept="image/*" multiple hidden>
+      <input type="file" id="inFotos" accept="image/*,video/mp4,video/webm,video/quicktime" multiple hidden>
       <div class="msg" id="mFotos"></div>
     </section>
 
     <section class="sec">
-      <h2>Video de la portada</h2>
+      <h2>Portada (dentro del celular)</h2>
       <div class="vid">
-        <video id="pvVid" muted loop playsinline autoplay></video>
+        <div class="pvbox"><video id="pvVid" muted loop playsinline autoplay></video><img id="pvImg" alt="Portada" class="hidden"></div>
         <div class="side">
-          <p>Es el video que se ve dentro del celular, arriba de todo. Usa un video vertical y corto (5 a 20 segundos), en <b>MP4</b>, de máximo <b>45 MB</b>. Se reproduce sin sonido y en bucle.</p>
-          <button class="btn btn-ghost" id="bVid">Cambiar video</button>
-          <input type="file" id="inVid" accept="video/mp4,video/webm,video/quicktime" hidden>
+          <p>Es lo que se ve dentro del celular, arriba de todo. Puede ser un <b>video</b> (vertical y corto, 5 a 20 segundos, MP4, máximo <b>45 MB</b>; se ve sin sonido y en bucle) o una <b>foto</b> vertical.</p>
+          <button class="btn btn-ghost" id="bVid">Cambiar portada (foto o video)</button>
+          <input type="file" id="inVid" accept="image/*,video/mp4,video/webm,video/quicktime" hidden>
           <div class="prog hidden" id="pgVid"><i></i></div>
           <div class="msg" id="mVid"></div>
         </div>
       </div>
+    </section>
+
+    <section class="sec">
+      <h2>Aviso de mayores de edad</h2>
+      <p class="h">Si está activado, al entrar a tu página aparece primero una pantalla que pregunta si la persona es mayor de 18 años, y las fotos se ven solo después de confirmar.</p>
+      <label class="sw"><input type="checkbox" id="aviso18"><span></span>Pedir confirmación de +18 al entrar</label>
     </section>
 
     <section class="sec">
@@ -235,37 +251,52 @@ function pintarFotos() {
   box.innerHTML = '';
   f.forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'ph';
-    d.innerHTML = `<img alt="Foto ${i + 1}"><span class="n">${i + 1}</span><div class="tools"><button type="button" title="Mover a la izquierda" aria-label="Mover a la izquierda">←</button><button type="button" class="del" title="Quitar foto" aria-label="Quitar foto">✕</button><button type="button" title="Mover a la derecha" aria-label="Mover a la derecha">→</button></div>`;
-    d.querySelector('img').src = p.url;
+    const esV = p.type === 'video';
+    d.innerHTML = (esV ? `<video muted loop playsinline autoplay preload="metadata"></video><span class="vt">VIDEO</span>` : `<img alt="Foto ${i + 1}">`) + `<span class="n">${i + 1}</span><div class="tools"><button type="button" title="Mover a la izquierda" aria-label="Mover a la izquierda">←</button><button type="button" class="del" title="Quitar foto" aria-label="Quitar foto">✕</button><button type="button" title="Mover a la derecha" aria-label="Mover a la derecha">→</button></div>`;
+    if (esV) { const v = d.querySelector('video'); if (p.poster) v.poster = p.poster; v.src = p.url; } else d.querySelector('img').src = p.url;
     const [izq, del, der] = d.querySelectorAll('button');
     izq.disabled = i === 0; der.disabled = i === f.length - 1;
     izq.onclick = () => { [f[i - 1], f[i]] = [f[i], f[i - 1]]; pintarFotos(); marcar(); };
     der.onclick = () => { [f[i + 1], f[i]] = [f[i], f[i + 1]]; pintarFotos(); marcar(); };
     del.onclick = () => {
-      if (f.length <= 1) { toast('Deja al menos una foto en el carrusel', true); return; }
-      if (!confirm('¿Quitar esta foto del carrusel?')) return;
-      const [x] = f.splice(i, 1); if (x.path) borrar.push(x.path); pintarFotos(); marcar();
+      if (f.length <= 1) { toast('Deja al menos una foto o video en el carrusel', true); return; }
+      if (!confirm(esV ? '¿Quitar este video del carrusel?' : '¿Quitar esta foto del carrusel?')) return;
+      const [x] = f.splice(i, 1); if (x.path) borrar.push(x.path); if (x.poster_path) borrar.push(x.poster_path); pintarFotos(); marcar();
     };
     box.appendChild(d);
   });
   const add = document.createElement('button'); add.type = 'button'; add.className = 'add';
-  add.innerHTML = '<span><b>+</b>Agregar fotos</span>'; add.onclick = () => $('#inFotos').click();
+  add.innerHTML = '<span><b>+</b>Agregar fotos o videos</span>'; add.onclick = () => $('#inFotos').click();
   box.appendChild(add);
 }
 
 $('#inFotos').onchange = async (e) => {
   const files = [...e.target.files]; e.target.value = ''; if (!files.length) return;
   const m = $('#mFotos'); m.className = 'msg'; trabajando(1);
-  let n = 0;
+  let n = 0, ok = 0, saltados = [];
   try {
     for (const file of files) {
-      m.textContent = `Subiendo foto ${++n} de ${files.length}…`;
-      const blob = await achicar(file);
-      const path = `fotos/${Date.now()}-${rnd()}.jpg`;
-      const url = await subir(path, blob, 'image/jpeg');
-      data.fotos.push({ url, path }); pintarFotos(); marcar();
+      n++;
+      if (file.type.startsWith('video/')) {
+        if (file.size > MAX_VIDEO) { saltados.push(`${file.name} (pesa ${(file.size / 1048576).toFixed(0)} MB, máximo 45)`); continue; }
+        m.textContent = `Subiendo video ${n} de ${files.length}… (puede tardar un poco)`;
+        const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+        const base = `fotos/${Date.now()}-${rnd()}`;
+        const poster = await portadaDeVideo(file);
+        const url = await subir(`${base}.${ext}`, file, file.type || 'video/mp4');
+        let purl = null; if (poster) purl = await subir(`${base}-portada.jpg`, poster, 'image/jpeg');
+        data.fotos.push({ type: 'video', url, path: `${base}.${ext}`, poster: purl || '', poster_path: purl ? `${base}-portada.jpg` : null });
+      } else {
+        m.textContent = `Subiendo foto ${n} de ${files.length}…`;
+        const blob = await achicar(file);
+        const path = `fotos/${Date.now()}-${rnd()}.jpg`;
+        const url = await subir(path, blob, 'image/jpeg');
+        data.fotos.push({ url, path });
+      }
+      ok++; pintarFotos(); marcar();
     }
-    m.className = 'msg ok'; m.textContent = `Listo: ${files.length === 1 ? '1 foto agregada' : files.length + ' fotos agregadas'}. No olvides guardar.`;
+    m.className = saltados.length ? 'msg err' : 'msg ok';
+    m.textContent = (ok ? `Listo: ${ok === 1 ? '1 archivo agregado' : ok + ' archivos agregados'}. No olvides guardar.` : '') + (saltados.length ? ` No se subió: ${saltados.join(', ')}.` : '');
   } catch (err) { m.className = 'msg err'; m.textContent = 'No se pudo subir: ' + (err.message || err); }
   finally { trabajando(-1); }
 };
@@ -275,6 +306,20 @@ $('#bVid').onclick = () => $('#inVid').click();
 $('#inVid').onchange = async (e) => {
   const file = e.target.files[0]; e.target.value = ''; if (!file) return;
   const m = $('#mVid'), pg = $('#pgVid'), bar = pg.querySelector('i');
+  if (file.type.startsWith('image/')) {
+    m.className = 'msg'; m.textContent = 'Subiendo foto…'; trabajando(1);
+    try {
+      const blob = await achicar(file, 1100);
+      const path = `video/${Date.now()}-${rnd()}-foto.jpg`;
+      const url = await subir(path, blob, 'image/jpeg');
+      if (data.video_path) borrar.push(data.video_path);
+      if (data.poster_path) borrar.push(data.poster_path);
+      Object.assign(data, { portada_tipo: 'foto', video: '', video_path: null, video_portada: url, poster_path: path });
+      mostrarPortada(); m.className = 'msg ok'; m.textContent = 'Foto de portada lista. No olvides guardar.'; marcar();
+    } catch (err) { m.className = 'msg err'; m.textContent = 'No se pudo subir la foto: ' + (err.message || err); }
+    finally { trabajando(-1); }
+    return;
+  }
   if (file.size > MAX_VIDEO) { m.className = 'msg err'; m.textContent = `El video pesa ${(file.size / 1048576).toFixed(0)} MB. El máximo es 45 MB: recórtalo o bájale la calidad.`; return; }
   m.className = 'msg'; m.textContent = 'Preparando video…'; pg.classList.remove('hidden'); bar.style.width = '15%'; trabajando(1);
   try {
@@ -286,13 +331,23 @@ $('#inVid').onchange = async (e) => {
     let purl = null; if (poster) purl = await subir(`${base}-portada.jpg`, poster, 'image/jpeg');
     if (data.video_path) borrar.push(data.video_path);
     if (data.poster_path) borrar.push(data.poster_path);
-    Object.assign(data, { video: url, video_path: `${base}.${ext}`, video_portada: purl || '', poster_path: purl ? `${base}-portada.jpg` : null });
-    $('#pvVid').src = url; $('#pvVid').poster = purl || ''; bar.style.width = '100%';
+    Object.assign(data, { portada_tipo: 'video', video: url, video_path: `${base}.${ext}`, video_portada: purl || '', poster_path: purl ? `${base}-portada.jpg` : null });
+    mostrarPortada(); bar.style.width = '100%';
     m.className = 'msg ok'; m.textContent = 'Video subido. No olvides guardar.' + (ext === 'mov' ? ' Ojo: los .mov de iPhone a veces no se ven en Android; si pasa, súbelo en MP4.' : '');
     marcar();
   } catch (err) { m.className = 'msg err'; m.textContent = 'No se pudo subir el video: ' + (err.message || err); }
   finally { trabajando(-1); setTimeout(() => pg.classList.add('hidden'), 800); }
 };
+
+function mostrarPortada() {
+  const esFoto = data.portada_tipo === 'foto', v = $('#pvVid'), im = $('#pvImg');
+  v.classList.toggle('hidden', esFoto); im.classList.toggle('hidden', !esFoto);
+  if (esFoto) { v.removeAttribute('src'); v.load(); im.src = data.video_portada || ''; }
+  else if (data.video) { v.poster = data.video_portada || ''; v.src = data.video; }
+}
+
+/* ---------- aviso +18 ---------- */
+$('#aviso18').addEventListener('change', (e) => { data.aviso18 = e.target.checked; marcar(); });
 
 /* ---------- textos ---------- */
 document.querySelectorAll('[data-f]').forEach((el) => el.addEventListener('input', () => { data[el.id] = el.value.trim(); if (el.id === 'nombre') $('#hdrName').textContent = el.value.trim() || 'Mi página'; marcar(); }));
@@ -325,7 +380,9 @@ async function cargar() {
   data.fotos = (data.fotos || []).map((f) => typeof f === 'string' ? { url: f, path: null } : f);
   CAMPOS.forEach((k) => { const el = $('#' + k); if (el) el.value = data[k] || ''; });
   $('#hdrName').textContent = data.nombre || 'Mi página';
-  if (data.video) { $('#pvVid').poster = data.video_portada || ''; $('#pvVid').src = data.video; }
+  if (data.aviso18 === undefined) data.aviso18 = true;
+  $('#aviso18').checked = !!data.aviso18;
+  mostrarPortada();
   pintarFotos(); marcar(false);
 }
 function vista(conSesion) { $('#vLogin').classList.toggle('hidden', conSesion); $('#vApp').classList.toggle('hidden', !conSesion); }
