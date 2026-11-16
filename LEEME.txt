@@ -1,0 +1,22 @@
+PÁGINA AUTOADMINISTRABLE - PASOS
+================================
+
+1. SUPABASE (gratis): crea una cuenta en supabase.com y un proyecto nuevo.
+
+2. BASE DE DATOS: abre supabase-setup.sql, cambia CORREO-DE-ELLA@gmail.com
+   por el correo de ella, y pega todo en Supabase → SQL Editor → Run.
+
+3. USUARIO: en Supabase → Authentication → Users → Add user → Create new user.
+   Pon el MISMO correo del paso 2 y una clave. Marca "Auto Confirm User".
+
+4. CERRAR REGISTROS: Authentication → Sign In / Providers →
+   desactiva "Allow new users to sign up".
+
+5. CLAVES: Project Settings → API (o "API Keys"). Copia la Project URL y la
+   anon/publishable key, y pégalas en config.js.
+
+6. GITHUB: sube index.html, admin.html, config.js y vercel.json al repositorio
+   (reemplazando el index.html anterior). Las fotos y el video que ya están
+   se quedan donde están.
+
+7. LISTO: ella entra a angelive.vercel.app/admin con su correo y clave.

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · Mi página</title>
+<meta name="theme-color" content="#0E0612">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230E0612'/%3E%3Ctext x='32' y='45' font-size='38' font-family='Georgia,serif' font-style='italic' text-anchor='middle' fill='%23FF3D9A'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#0E0612;--panel:#170A1D;--card:rgba(255,255,255,.045);--line:rgba(255,255,255,.1);--ink:#FBF3F8;--mute:#B9A6BF;--pink:#FF3D9A;--pink2:#FF7AC0;--violet:#8B5CF6;--ok:#3DDC97;--bad:#FF6B6B;--serif:'Fraunces',Georgia,serif;--sans:'Manrope',system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(60vw 40vw at 100% -10%,rgba(255,61,154,.16),transparent 60%),radial-gradient(50vw 40vw at -10% 40%,rgba(139,92,246,.14),transparent 60%),var(--bg);background-attachment:fixed;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--pink2);outline-offset:3px}
+.hidden{display:none!important}
+.logo{font-family:var(--serif);font-style:italic;font-weight:600;font-size:30px;display:flex;align-items:center;gap:10px}
+.logo i{width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 12px var(--pink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;border:0;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s,opacity .2s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-main{background:linear-gradient(135deg,var(--pink),#FF5FB0 55%,var(--violet));color:#fff;box-shadow:0 10px 26px -10px rgba(255,61,154,.8)}
+.btn-main:not(:disabled):hover{transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{background:rgba(255,255,255,.11)}
+.btn-sm{min-height:36px;padding:0 14px;font-size:13.5px}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.box{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:38px 32px;box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+.box h1{font-family:var(--serif);font-style:italic;font-weight:500;font-size:38px;margin:22px 0 6px;letter-spacing:-.02em}
+.box p{margin:0 0 24px;color:var(--mute);line-height:1.55}
+label{display:block;font-size:13px;font-weight:700;color:var(--mute);margin:0 0 8px;letter-spacing:.02em}
+input[type=text],input[type=email],input[type=password],input[type=url],textarea{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:15.5px;transition:border-color .2s,background .2s}
+input:focus,textarea:focus{outline:none;border-color:rgba(255,61,154,.6);background:rgba(0,0,0,.35)}
+textarea{min-height:96px;resize:vertical;line-height:1.55}
+.f{margin-bottom:18px}
+.msg{font-size:14px;line-height:1.5;margin-top:14px;min-height:20px}
+.msg.err{color:var(--bad)} .msg.ok{color:var(--ok)}
+
+/* app */
+header{position:sticky;top:0;z-index:20;background:rgba(14,6,18,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{max-width:1040px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.bar .r{display:flex;align-items:center;gap:10px}
+.state{font-size:13px;font-weight:700;color:var(--mute);display:flex;align-items:center;gap:8px}
+.state::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.state.dirty{color:var(--pink2)} .state.dirty::before{background:var(--pink)}
+main{max-width:1040px;margin:0 auto;padding:30px 22px 120px}
+.hi{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(30px,5vw,44px);margin:6px 0 4px;letter-spacing:-.02em}
+.hi + p{color:var(--mute);margin:0 0 28px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:26px 24px;margin-bottom:22px}
+.sec h2{margin:0 0 4px;font-size:19px}
+.sec .h{color:var(--mute);font-size:14px;margin:0 0 22px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.ph{position:relative;border-radius:16px;overflow:hidden;background:#1d0e24;aspect-ratio:4/5;border:1px solid var(--line)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .n{position:absolute;top:8px;left:8px;background:rgba(14,6,18,.75);font-size:12px;font-weight:800;padding:4px 9px;border-radius:99px}
+.ph .tools{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:6px;padding:8px;background:linear-gradient(transparent,rgba(10,3,14,.9))}
+.ph .tools button{width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);cursor:pointer;font-size:15px;font-weight:800;display:grid;place-items:center}
+.ph .tools button:hover{background:rgba(255,255,255,.3)}
+.ph .tools button.del{background:rgba(255,107,107,.85)}
+.ph .tools button:disabled{opacity:.3;cursor:default}
+.add{background:transparent;border:2px dashed rgba(255,61,154,.45);border-radius:16px;aspect-ratio:4/5;display:grid;place-items:center;text-align:center;cursor:pointer;color:var(--pink2);font-weight:700;padding:12px;transition:background .2s}
+.add:hover{background:rgba(255,61,154,.08)}
+.add b{display:block;font-size:34px;line-height:1;margin-bottom:6px}
+.vid{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.vid video{width:200px;aspect-ratio:9/15;object-fit:cover;border-radius:18px;background:#1d0e24;border:1px solid var(--line)}
+.vid .side{flex:1;min-width:220px}
+.vid .side p{color:var(--mute);font-size:14px;line-height:1.55;margin:0 0 16px}
+.prog{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:12px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--violet));transition:width .3s}
+.save{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(130%);z-index:30;display:flex;align-items:center;gap:16px;padding:10px 10px 10px 22px;border-radius:999px;background:rgba(23,10,29,.92);backdrop-filter:blur(14px);border:1px solid rgba(255,61,154,.35);box-shadow:0 20px 50px -12px rgba(0,0,0,.9);transition:transform .35s ease;font-weight:700;font-size:14.5px;white-space:nowrap}
+.save.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:40;padding:12px 20px;border-radius:14px;font-weight:700;font-size:14.5px;background:#1f2b25;color:var(--ok);border:1px solid rgba(61,220,151,.35);box-shadow:0 16px 40px -12px rgba(0,0,0,.8);opacity:0;pointer-events:none;transition:opacity .3s}
+.toast.err{background:#2b1f1f;color:var(--bad);border-color:rgba(255,107,107,.35)}
+.toast.show{opacity:1}
+.setup{max-width:620px;margin:60px auto;padding:0 22px;line-height:1.6;color:var(--mute)}
+.setup code{background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px;color:var(--ink)}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}.bar .state{display:none}.sec{padding:22px 18px}.save{left:12px;right:12px;transform:translateY(130%);justify-content:space-between}.save.show{transform:none}}
+</style>
+</head>
+<body>
+
+<div id="vSetup" class="setup hidden">
+  <div class="logo">Panel <i></i></div>
+  <h2 style="color:var(--ink)">Falta conectar Supabase</h2>
+  <p>Abre el archivo <code>config.js</code> y pega la <b>URL</b> y la <b>anon / publishable key</b> de tu proyecto de Supabase (Project Settings → API). Después vuelve a subir los archivos.</p>
+</div>
+
+<div id="vLogin" class="login hidden">
+  <form class="box" id="fLogin" autocomplete="on">
+    <div class="logo">Mi página <i></i></div>
+    <h1>Hola de nuevo</h1>
+    <p>Entra para cambiar tus fotos, tu video y tus textos.</p>
+    <div class="f"><label for="em">Correo</label><input id="em" type="email" autocomplete="username" required></div>
+    <div class="f"><label for="pw">Clave</label><input id="pw" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-main" style="width:100%" id="bLogin">Entrar</button>
+    <div class="msg err" id="mLogin" role="alert"></div>
+  </form>
+</div>
+
+<div id="vApp" class="hidden">
+  <header>
+    <div class="bar">
+      <div class="logo" style="font-size:26px"><span id="hdrName">Mi página</span> <i></i></div>
+      <div class="r">
+        <span class="state" id="st">Todo guardado</span>
+        <a class="btn btn-ghost btn-sm" href="./" target="_blank" rel="noopener">Ver mi página ↗</a>
+        <button class="btn btn-ghost btn-sm" id="bOut">Salir</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <h1 class="hi">Tu panel ✦</h1>
+    <p>Cambia lo que quieras y toca <b>Guardar cambios</b>. Tu página se actualiza al instante.</p>
+
+    <section class="sec">
+      <h2>Fotos del carrusel</h2>
+      <p class="h">Se muestran en este orden y pasan solas. Usa las flechas para moverlas. Las fotos se achican solas para que la página cargue rápido.</p>
+      <div class="photos" id="photos"></div>
+      <input type="file" id="inFotos" accept="image/*" multiple hidden>
+      <div class="msg" id="mFotos"></div>
+    </section>
+
+    <section class="sec">
+      <h2>Video de la portada</h2>
+      <div class="vid">
+        <video id="pvVid" muted loop playsinline autoplay></video>
+        <div class="side">
+          <p>Es el video que se ve dentro del celular, arriba de todo. Usa un video vertical y corto (5 a 20 segundos), en <b>MP4</b>, de máximo <b>45 MB</b>. Se reproduce sin sonido y en bucle.</p>
+          <button class="btn btn-ghost" id="bVid">Cambiar video</button>
+          <input type="file" id="inVid" accept="video/mp4,video/webm,video/quicktime" hidden>
+          <div class="prog hidden" id="pgVid"><i></i></div>
+          <div class="msg" id="mVid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2>Textos</h2>
+      <p class="h">Lo que la gente lee en tu página.</p>
+      <div class="grid2">
+        <div class="f"><label for="nombre">Tu nombre</label><input id="nombre" type="text" maxlength="30" data-f></div>
+        <div class="f"><label for="frase">Frase de portada</label><input id="frase" type="text" maxlength="80" data-f></div>
+      </div>
+      <div class="f"><label for="texto_portada">Texto de portada</label><textarea id="texto_portada" maxlength="300" data-f></textarea></div>
+      <div class="f" style="margin:0"><label for="texto_sobre_mi">Texto de "Sobre mí"</label><textarea id="texto_sobre_mi" maxlength="600" data-f style="min-height:130px"></textarea></div>
+    </section>
+
+    <section class="sec">
+      <h2>Links</h2>
+      <p class="h">Los botones de tu página llevan aquí. Si dejas Telegram vacío, ese botón se esconde.</p>
+      <div class="grid2">
+        <div class="f"><label for="usuario">Usuario de Tango (sin @)</label><input id="usuario" type="text" maxlength="40" data-f></div>
+        <div class="f"><label for="link_tango">Link de tu perfil de Tango</label><input id="link_tango" type="url" placeholder="https://www.tango.me/..." data-f></div>
+      </div>
+      <div class="f" style="margin:0"><label for="link_telegram">Link de Telegram (opcional)</label><input id="link_telegram" type="url" placeholder="https://t.me/..." data-f></div>
+    </section>
+  </main>
+
+  <div class="save" id="saveBar">
+    <span>Tienes cambios sin guardar</span>
+    <button class="btn btn-main" id="bSave">Guardar cambios</button>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const $ = (s) => document.querySelector(s);
+const C = window.SITIO || {};
+const BUCKET = 'media';
+const MAX_VIDEO = 45 * 1024 * 1024;
+const CAMPOS = ['nombre','frase','texto_portada','texto_sobre_mi','usuario','link_tango','link_telegram'];
+
+if (!C.url || !C.key || C.url.includes('TU-PROYECTO')) { $('#vSetup').classList.remove('hidden'); throw new Error('config.js sin completar'); }
+
+const sb = createClient(C.url, C.key);
+let data = null;          // contenido actual (lo que se guardará)
+let borrar = [];          // archivos a borrar del storage después de guardar
+let dirty = false, ocupado = 0;
+
+/* ---------- utilidades ---------- */
+function toast(t, err) { const el = $('#toast'); el.textContent = t; el.className = 'toast show' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => el.className = 'toast' + (err ? ' err' : ''), 3200); }
+function marcar(v = true) { dirty = v; $('#st').textContent = v ? 'Cambios sin guardar' : 'Todo guardado'; $('#st').classList.toggle('dirty', v); $('#saveBar').classList.toggle('show', v); }
+function trabajando(d) { ocupado += d; $('#bSave').disabled = ocupado > 0; $('#bSave').textContent = ocupado > 0 ? 'Subiendo…' : 'Guardar cambios'; }
+const rnd = () => Math.random().toString(36).slice(2, 8);
+const urlPublica = (path) => sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+
+async function subir(path, blob, tipo) {
+  const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: tipo, cacheControl: '31536000', upsert: false });
+  if (error) throw error;
+  return urlPublica(path);
+}
+
+function achicar(file, max = 1400, q = 0.85) {
+  return new Promise((ok, mal) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      c.toBlob((b) => b ? ok(b) : mal(new Error('No se pudo procesar la foto')), 'image/jpeg', q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); mal(new Error('Formato de foto no soportado (usa JPG o PNG)')); };
+    img.src = u;
+  });
+}
+
+function portadaDeVideo(file) {
+  return new Promise((ok) => {
+    const v = document.createElement('video'), u = URL.createObjectURL(file);
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = u;
+    const fin = (b) => { URL.revokeObjectURL(u); ok(b); };
+    v.onloadeddata = () => { v.currentTime = Math.min(1, (v.duration || 2) / 3); };
+    v.onseeked = () => {
+      const k = Math.min(1, 720 / Math.max(v.videoWidth, v.videoHeight));
+      const c = document.createElement('canvas'); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      c.toBlob((b) => fin(b), 'image/jpeg', 0.82);
+    };
+    v.onerror = () => fin(null);
+    setTimeout(() => fin(null), 15000);
+  });
+}
+
+/* ---------- fotos ---------- */
+function pintarFotos() {
+  const box = $('#photos'), f = data.fotos || [];
+  box.innerHTML = '';
+  f.forEach((p, i) => {
+    const d = document.createElement('div'); d.className = 'ph';
+    d.innerHTML = `<img alt="Foto ${i + 1}"><span class="n">${i + 1}</span><div class="tools"><button type="button" title="Mover a la izquierda" aria-label="Mover a la izquierda">←</button><button type="button" class="del" title="Quitar foto" aria-label="Quitar foto">✕</button><button type="button" title="Mover a la derecha" aria-label="Mover a la derecha">→</button></div>`;
+    d.querySelector('img').src = p.url;
+    const [izq, del, der] = d.querySelectorAll('button');
+    izq.disabled = i === 0; der.disabled = i === f.length - 1;
+    izq.onclick = () => { [f[i - 1], f[i]] = [f[i], f[i - 1]]; pintarFotos(); marcar(); };
+    der.onclick = () => { [f[i + 1], f[i]] = [f[i], f[i + 1]]; pintarFotos(); marcar(); };
+    del.onclick = () => {
+      if (f.length <= 1) { toast('Deja al menos una foto en el carrusel', true); return; }
+      if (!confirm('¿Quitar esta foto del carrusel?')) return;
+      const [x] = f.splice(i, 1); if (x.path) borrar.push(x.path); pintarFotos(); marcar();
+    };
+    box.appendChild(d);
+  });
+  const add = document.createElement('button'); add.type = 'button'; add.className = 'add';
+  add.innerHTML = '<span><b>+</b>Agregar fotos</span>'; add.onclick = () => $('#inFotos').click();
+  box.appendChild(add);
+}
+
+$('#inFotos').onchange = async (e) => {
+  const files = [...e.target.files]; e.target.value = ''; if (!files.length) return;
+  const m = $('#mFotos'); m.className = 'msg'; trabajando(1);
+  let n = 0;
+  try {
+    for (const file of files) {
+      m.textContent = `Subiendo foto ${++n} de ${files.length}…`;
+      const blob = await achicar(file);
+      const path = `fotos/${Date.now()}-${rnd()}.jpg`;
+      const url = await subir(path, blob, 'image/jpeg');
+      data.fotos.push({ url, path }); pintarFotos(); marcar();
+    }
+    m.className = 'msg ok'; m.textContent = `Listo: ${files.length === 1 ? '1 foto agregada' : files.length + ' fotos agregadas'}. No olvides guardar.`;
+  } catch (err) { m.className = 'msg err'; m.textContent = 'No se pudo subir: ' + (err.message || err); }
+  finally { trabajando(-1); }
+};
+
+/* ---------- video ---------- */
+$('#bVid').onclick = () => $('#inVid').click();
+$('#inVid').onchange = async (e) => {
+  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+  const m = $('#mVid'), pg = $('#pgVid'), bar = pg.querySelector('i');
+  if (file.size > MAX_VIDEO) { m.className = 'msg err'; m.textContent = `El video pesa ${(file.size / 1048576).toFixed(0)} MB. El máximo es 45 MB: recórtalo o bájale la calidad.`; return; }
+  m.className = 'msg'; m.textContent = 'Preparando video…'; pg.classList.remove('hidden'); bar.style.width = '15%'; trabajando(1);
+  try {
+    const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+    const base = `video/${Date.now()}-${rnd()}`;
+    const poster = await portadaDeVideo(file); bar.style.width = '35%';
+    m.textContent = 'Subiendo video… (puede tardar un poco)';
+    const url = await subir(`${base}.${ext}`, file, file.type || 'video/mp4'); bar.style.width = '85%';
+    let purl = null; if (poster) purl = await subir(`${base}-portada.jpg`, poster, 'image/jpeg');
+    if (data.video_path) borrar.push(data.video_path);
+    if (data.poster_path) borrar.push(data.poster_path);
+    Object.assign(data, { video: url, video_path: `${base}.${ext}`, video_portada: purl || '', poster_path: purl ? `${base}-portada.jpg` : null });
+    $('#pvVid').src = url; $('#pvVid').poster = purl || ''; bar.style.width = '100%';
+    m.className = 'msg ok'; m.textContent = 'Video subido. No olvides guardar.' + (ext === 'mov' ? ' Ojo: los .mov de iPhone a veces no se ven en Android; si pasa, súbelo en MP4.' : '');
+    marcar();
+  } catch (err) { m.className = 'msg err'; m.textContent = 'No se pudo subir el video: ' + (err.message || err); }
+  finally { trabajando(-1); setTimeout(() => pg.classList.add('hidden'), 800); }
+};
+
+/* ---------- textos ---------- */
+document.querySelectorAll('[data-f]').forEach((el) => el.addEventListener('input', () => { data[el.id] = el.value.trim(); if (el.id === 'nombre') $('#hdrName').textContent = el.value.trim() || 'Mi página'; marcar(); }));
+
+/* ---------- guardar ---------- */
+$('#bSave').onclick = async () => {
+  for (const k of ['link_tango', 'link_telegram']) {
+    const v = (data[k] || '').trim();
+    if (v && !/^https?:\/\//i.test(v)) { toast('El link debe empezar con https://', true); $('#' + k).focus(); return; }
+  }
+  if (!data.nombre) { toast('Escribe tu nombre', true); $('#nombre').focus(); return; }
+  trabajando(1); $('#bSave').textContent = 'Guardando…';
+  try {
+    data.usuario = (data.usuario || '').replace(/^@/, '');
+    const { data: filas, error } = await sb.from('sitio').update({ data, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
+    if (error) throw error;
+    if (!filas || !filas.length) throw new Error('Este correo no tiene permiso para editar la página.');
+    if (borrar.length) { await sb.storage.from(BUCKET).remove(borrar); borrar = []; }
+    marcar(false); toast('¡Guardado! Tu página ya está actualizada ✓');
+  } catch (err) { toast('No se pudo guardar: ' + (err.message || err), true); }
+  finally { trabajando(-1); }
+};
+window.addEventListener('beforeunload', (e) => { if (dirty || ocupado) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---------- sesión ---------- */
+async function cargar() {
+  const { data: fila, error } = await sb.from('sitio').select('data').eq('id', 1).maybeSingle();
+  if (error || !fila) { toast('No se encontró el contenido. ¿Ejecutaste el script SQL en Supabase?', true); data = { fotos: [] }; }
+  else data = fila.data || {};
+  data.fotos = (data.fotos || []).map((f) => typeof f === 'string' ? { url: f, path: null } : f);
+  CAMPOS.forEach((k) => { const el = $('#' + k); if (el) el.value = data[k] || ''; });
+  $('#hdrName').textContent = data.nombre || 'Mi página';
+  if (data.video) { $('#pvVid').poster = data.video_portada || ''; $('#pvVid').src = data.video; }
+  pintarFotos(); marcar(false);
+}
+function vista(conSesion) { $('#vLogin').classList.toggle('hidden', conSesion); $('#vApp').classList.toggle('hidden', !conSesion); }
+
+$('#fLogin').onsubmit = async (e) => {
+  e.preventDefault(); const b = $('#bLogin'), m = $('#mLogin'); b.disabled = true; b.textContent = 'Entrando…'; m.textContent = '';
+  const { error } = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });
+  b.disabled = false; b.textContent = 'Entrar';
+  if (error) { m.textContent = /invalid/i.test(error.message) ? 'Correo o clave incorrectos.' : error.message; return; }
+  vista(true); await cargar();
+};
+$('#bOut').onclick = async () => { if (dirty && !confirm('Tienes cambios sin guardar. ¿Salir igual?')) return; await sb.auth.signOut(); dirty = false; vista(false); };
+
+const { data: { session } } = await sb.auth.getSession();
+vista(!!session); if (session) await cargar();
+</script>
+</body>
+</html>

@@ -252,8 +252,8 @@ footer{border-top:1px solid var(--line);margin-top:120px}
     <div>
       <span class="live reveal"><span class="dot"></span>Directos en Tango</span>
       <h1 class="reveal d1"><em>Ange</em></h1>
-      <p class="tagline reveal d2">Ven a verme en vivo.</p>
-      <p class="lead reveal d2">Pasa al chat, dime hola y quédate un ratito conmigo. Te prometo muy buena compañía.</p>
+      <p class="tagline reveal d2" data-k="frase">Ven a verme en vivo.</p>
+      <p class="lead reveal d2" data-k="texto_portada">Pasa al chat, dime hola y quédate un ratito conmigo. Te prometo muy buena compañía.</p>
       <div class="ctas reveal d3">
         <a class="btn btn-main" href="https://www.tango.me/ange594" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z"/></svg>
@@ -342,7 +342,7 @@ footer{border-top:1px solid var(--line);margin-top:120px}
     <div>
       <div class="kicker reveal">Sobre mí</div>
       <h2 class="reveal d1">Hola, soy <em>Ange</em>.</h2>
-      <p class="big reveal d2">Transmito en vivo en Tango y me encanta que me escriban en el chat para contarme cómo les fue el día… o qué travesura traen en mente. Entra a mi directo, saluda y quédate un ratito.</p>
+      <p class="big reveal d2" data-k="texto_sobre_mi">Transmito en vivo en Tango y me encanta que me escriban en el chat para contarme cómo les fue el día… o qué travesura traen en mente. Entra a mi directo, saluda y quédate un ratito.</p>
       <div class="sig reveal d2">— Ange 💋</div>
       <div class="ctas reveal d3">
         <a class="btn btn-main" href="https://www.tango.me/ange594" target="_blank" rel="noopener noreferrer">Ven a verme</a>
@@ -442,9 +442,10 @@ footer{border-top:1px solid var(--line);margin-top:120px}
 })();
 </script>
 <script>
-(function(){
+window.startSlider=function(){
+  if(window.__sliderOn) return; window.__sliderOn=true;
   var box=document.getElementById('slider'),tr=document.getElementById('slides'),dots=document.getElementById('sdots');
-  if(!box) return;
+  if(!box||!tr.children.length) return;
   var n=tr.children.length, i=0, timer, busy=false;
   tr.appendChild(tr.children[0].cloneNode(true));
   for(var k=0;k<n;k++){(function(k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Foto '+(k+1));b.onclick=function(){go(k);restart();};dots.appendChild(b);})(k);}
@@ -462,6 +463,46 @@ footer{border-top:1px solid var(--line);margin-top:120px}
   box.addEventListener('mouseleave',restart);
   document.addEventListener('visibilitychange',function(){document.hidden?clearInterval(timer):restart();});
   paint(); restart();
+};
+</script>
+<script src="config.js"></script>
+<script>
+(function(){
+  var C=window.SITIO||{}, listo=false;
+  function fin(){ if(listo) return; listo=true; window.startSlider&&window.startSlider(); }
+  if(!C.url||!C.key||C.url.indexOf('TU-PROYECTO')>-1){ fin(); return; }
+  var to=setTimeout(fin,3000);
+  fetch(C.url.replace(/\/$/,'')+'/rest/v1/sitio?id=eq.1&select=data',{headers:{apikey:C.key}})
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(rows){ if(rows&&rows[0]&&rows[0].data) aplicar(rows[0].data); })
+    .catch(function(e){ console.warn('[sitio] usando contenido por defecto:',e); })
+    .then(function(){ clearTimeout(to); fin(); });
+
+  function reemplazarTexto(viejo,nuevo){
+    if(!nuevo||nuevo===viejo) return;
+    var re=new RegExp(viejo.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
+    var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null), n;
+    while((n=w.nextNode())){ if(n.parentNode&&/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)) continue; if(n.nodeValue.indexOf(viejo)>-1) n.nodeValue=n.nodeValue.replace(re,nuevo); }
+    document.querySelectorAll('[alt],[aria-label],[title]').forEach(function(el){
+      ['alt','aria-label','title'].forEach(function(a){ var v=el.getAttribute(a); if(v&&v.indexOf(viejo)>-1) el.setAttribute(a,v.replace(re,nuevo)); });
+    });
+    document.title=document.title.replace(re,nuevo);
+  }
+  function aplicar(d){
+    if(d.usuario) reemplazarTexto('ange594',d.usuario.replace(/^@/,''));
+    if(d.nombre){ reemplazarTexto('Ange',d.nombre); var w=document.querySelector('.who span'); if(w) w.textContent=d.nombre.charAt(0).toUpperCase(); }
+    document.querySelectorAll('[data-k]').forEach(function(el){ var v=d[el.getAttribute('data-k')]; if(v) el.textContent=v; });
+    if(d.link_tango) document.querySelectorAll('a[href*="tango.me"]').forEach(function(a){ a.href=d.link_tango; });
+    document.querySelectorAll('a[href*="t.me/"]').forEach(function(a){ if(d.link_telegram) a.href=d.link_telegram; else if(d.link_telegram==='') a.style.display='none'; });
+    if(d.fotos&&d.fotos.length){
+      var tr=document.getElementById('slides'), nom=d.nombre||'Ange';
+      tr.innerHTML=d.fotos.map(function(f,i){ var u=typeof f==='string'?f:f.url; return '<div class="slide"><img src="'+String(u).replace(/"/g,'&quot;')+'" alt="Foto de '+nom.replace(/</g,'')+' '+(i+1)+'" decoding="async"></div>'; }).join('');
+    }
+    if(d.video){
+      var v=document.getElementById('livevid');
+      if(v){ if(d.video_portada) v.poster=d.video_portada; v.src=d.video; v.muted=true; v.load(); var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
+    }
+  }
 })();
 </script>
 <script>
