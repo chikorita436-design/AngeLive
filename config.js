@@ -1,6 +1,5 @@
-// Datos de conexión a Supabase (Project Settings → API).
-// La "anon / publishable key" es pública por diseño: la seguridad la ponen las reglas (RLS) del script SQL.
+// Datos de conexión a Supabase
 window.SITIO = {
-  url: "https://TU-PROYECTO.supabase.co",
-  key: "TU-ANON-O-PUBLISHABLE-KEY"
+  url: "https://uzsvoakyuilbdhowypgn.supabase.co",
+  key: "sb_publishable_RJWbnjIed7pmfPstWrCTyg_MzRQ55NV"
 };
